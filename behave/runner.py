@@ -1240,11 +1240,11 @@ class Runner(ModelRunner):
 
     def setup_capture(self):
         if self.config.stdout_capture:
-            self.stdout_capture = StringIo()
+            self.stdout_capture = StringIO()
             self.context.stdout_capture = self.stdout_capture
 
         if self.config.stderr_capture:
-            self.stderr_capture = StringIo()
+            self.stderr_capture = StringIO()
             self.context.stderr_capture = self.stderr_capture
 
         if self.config.log_capture:
