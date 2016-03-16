@@ -56,7 +56,7 @@ def find_packages_by_root_package(where):
 # SETUP:
 # -----------------------------------------------------------------------------
 setup(
-    name="behave",
+    name="behave-parallel",
     version="1.2.6.dev0",
     description="behave is behaviour-driven development, Python style",
     long_description=description,
