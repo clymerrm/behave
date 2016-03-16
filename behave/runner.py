@@ -6,7 +6,7 @@ import re
 import time
 import os.path
 import six
-from io import StringIO
+from six import StringIO
 import sys
 import traceback
 import warnings
