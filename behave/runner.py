@@ -14,7 +14,7 @@ import warnings
 import weakref
 import six
 import collections
-from six import StringIO
+from io import StringIO
 
 from behave import matchers
 from behave.step_registry import setup_step_decorators, registry as the_step_registry
@@ -910,7 +910,7 @@ class Runner(ModelRunner):
             except Exception as e:
                 break
             current_job = self.joblist[joblist_index]
-            writebuf = StringIO.StringIO()
+            writebuf = StringIO()
             self.setfeature(current_job)
             self.config.outputs = []
             self.config.outputs.append(StreamOpener(stream=writebuf))
@@ -1240,11 +1240,11 @@ class Runner(ModelRunner):
 
     def setup_capture(self):
         if self.config.stdout_capture:
-            self.stdout_capture = StringIO.StringIO()
+            self.stdout_capture = StringIo()
             self.context.stdout_capture = self.stdout_capture
 
         if self.config.stderr_capture:
-            self.stderr_capture = StringIO.StringIO()
+            self.stderr_capture = StringIo()
             self.context.stderr_capture = self.stderr_capture
 
         if self.config.log_capture:
