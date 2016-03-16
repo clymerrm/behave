@@ -26,6 +26,7 @@ ConfigParser = configparser.ConfigParser
 if six.PY2:
     ConfigParser = configparser.SafeConfigParser
 
+
 # -----------------------------------------------------------------------------
 # CONFIGURATION DATA TYPES:
 # -----------------------------------------------------------------------------
@@ -64,8 +65,6 @@ class ConfigError(Exception):
     pass
 
 
-
-
 # -----------------------------------------------------------------------------
 # CONFIGURATION SCHEMA:
 # -----------------------------------------------------------------------------
@@ -89,6 +88,17 @@ options = [
           metavar="NAME=VALUE",
           help="""Define user-specific data for the config.userdata dictionary.
                   Example: -D foo=bar to store it in config.userdata["foo"].""")),
+
+    (('--processes',),
+     dict(metavar="NUMBER", dest='proc_count',
+          help="""Use multiple pids to do the work faster.
+          Not all options work properly under parallel mode. See README.md""")),
+
+    (('--parallel-element',),
+     dict(metavar="STRING", dest='parallel_element',
+          help="""If you used the --processes option, then this will control how the tests get parallelized. Valid
+          values are 'feature' or 'scenario'. Anything else will error.
+          See readme for more info on how this works.""")),
 
     (("-e", "--exclude"),
      dict(metavar="PATTERN", dest="exclude_re",
@@ -119,7 +129,6 @@ options = [
     ((),  # -- CONFIGFILE only
      dict(dest="default_format",
           help="Specify default formatter (default: pretty).")),
-
 
     (("-f", "--format"),
      dict(action="append",
@@ -161,7 +170,7 @@ options = [
           help="""Don't print multiline strings and tables under
                   steps.""")),
 
-    (("--multiline", ),
+    (("--multiline",),
      dict(action="store_true", dest="show_multiline",
           help="""Print multiline strings and tables under steps.
                   This is the default behaviour. This switch is used to
@@ -368,7 +377,7 @@ raw_value_options = frozenset([
 def read_configuration(path):
     # pylint: disable=too-many-locals, too-many-branches
     config = ConfigParser()
-    config.optionxform = str    # -- SUPPORT: case-sensitive keys
+    config.optionxform = str  # -- SUPPORT: case-sensitive keys
     config.read(path)
     config_dir = os.path.dirname(path)
     result = {}
@@ -394,7 +403,7 @@ def read_configuration(path):
             result[dest] = config.getboolean("behave", dest)
         elif action == "append":
             if dest == "userdata_defines":
-                continue    # -- SKIP-CONFIGFILE: Command-line only option.
+                continue  # -- SKIP-CONFIGFILE: Command-line only option.
             result[dest] = \
                 [s.strip() for s in config.get("behave", dest).splitlines()]
         else:
@@ -429,7 +438,7 @@ def read_configuration(path):
     # SCHEMA: config_section: data_name
     special_config_section_map = {
         "behave.formatters": "more_formatters",
-        "behave.userdata":   "userdata",
+        "behave.userdata": "userdata",
     }
     for section_name, data_name in special_config_section_map.items():
         result[data_name] = {}
@@ -465,7 +474,7 @@ def load_configuration(defaults, verbose=False):
 
 def setup_parser():
     # construct the parser
-    #usage = "%(prog)s [options] [ [FILE|DIR|URL][:LINE[:LINE]*] ]+"
+    # usage = "%(prog)s [options] [ [FILE|DIR|URL][:LINE[:LINE]*] ]+"
     usage = "%(prog)s [options] [ [DIR|FILE|FILE:LINE] ]+"
     description = """\
     Run a number of feature tests with behave."""
@@ -479,7 +488,7 @@ def setup_parser():
     parser = argparse.ArgumentParser(usage=usage, description=description)
     for fixed, keywords in options:
         if not fixed:
-            continue    # -- CONFIGFILE only.
+            continue  # -- CONFIGFILE only.
         if "config_help" in keywords:
             keywords = dict(keywords)
             del keywords["config_help"]
@@ -487,6 +496,7 @@ def setup_parser():
     parser.add_argument("paths", nargs="*",
                         help="Feature directory, file or file location (FILE:LINE).")
     return parser
+
 
 class Configuration(object):
     """Configuration object for behave and behave runners."""
@@ -509,8 +519,8 @@ class Configuration(object):
         stage=None,
         userdata={},
         # -- SPECIAL:
-        default_format="pretty",    # -- Used when no formatters are configured.
-        default_tags="",            # -- Used when no tags are defined.
+        default_format="pretty",  # -- Used when no formatters are configured.
+        default_tags="",  # -- Used when no tags are defined.
         scenario_outline_annotation_schema=u"{name} -- @{row.id} {examples.name}"
     )
     cmdline_only_options = set("userdata_defines")
@@ -717,7 +727,7 @@ class Configuration(object):
         :param kwargs:      Passed to :func:`logging.basicConfig()`
         """
         if level is None:
-            level = self.logging_level      # pylint: disable=no-member
+            level = self.logging_level  # pylint: disable=no-member
 
         if configfile:
             from logging.config import fileConfig
