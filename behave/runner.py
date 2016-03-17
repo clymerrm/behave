@@ -6,7 +6,7 @@ import re
 import time
 import os.path
 import six
-from six import StringIO
+from io import StringIO
 import sys
 import traceback
 import warnings
@@ -881,7 +881,7 @@ class Runner(ModelRunner):
             self.feature = current_job.feature
 
     def generatereport(self, proc_number, current_job, start_time, end_time, writebuf):
-        if not writebuf.pos:
+        if not writebuf.tell():
             return ""
 
         reportheader = start_time + "|WORKER" + str(proc_number) + " START|" + \
@@ -1185,8 +1185,9 @@ class Runner(ModelRunner):
             self.log_capture.abandon()
 
     def clean_buffer(self, buf):
-        for i in range(len(buf.buflist)):
-            buf.buflist[i] = self.to_unicode(buf.buflist[i])
+        buflist = buf.readlines()
+        for i in range(len(buflist)):
+            buflist[i] = self.to_unicode(buflist[i])
 
 
     @staticmethod
