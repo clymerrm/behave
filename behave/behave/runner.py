@@ -811,7 +811,7 @@ class Runner(object):
         if current_job.type != 'scenario':
             [self.countstepstatus(s, results) for s in current_job.scenarios]
         else:
-            for step in current_job.all_steps:©
+            for step in current_job.all_steps:
                 results['steps_' + step.status] += 1
 
     def multiproc_fullreport(self):
