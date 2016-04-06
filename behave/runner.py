@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+#latest change for formatters
 
 import contextlib
 import logging
@@ -17,7 +17,7 @@ import collections
 
 from behave import matchers
 from behave.step_registry import setup_step_decorators
-from behave.formatter import formatters
+from behave.formatter._registry import make_formatters
 from behave.configuration import ConfigError
 from behave.log_capture import LoggingCapture
 from behave.runner_util import collect_feature_locations, parse_features
@@ -583,7 +583,7 @@ class Runner(object):
             return self.run_multiproc()
 
         # -- STEP: Run all features.
-        self.formatters = formatters.get_formatter(self.config, stream_openers)
+        self.formatters = make_formatters(self.config, stream_openers)
         undefined_steps_initial_size = len(self.undefined)
         run_feature = True
         for feature in features:
@@ -707,7 +707,7 @@ class Runner(object):
 
             stream_openers = self.config.outputs
 
-            self.formatters = formatters.get_formatter(self.config, stream_openers)
+            self.formatters = make_formatters(self.config, stream_openers)
 
             for formatter in self.formatters:
                 formatter.uri(current_job.filename)

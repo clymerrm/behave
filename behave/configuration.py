@@ -17,7 +17,6 @@ from behave.tag_expression import TagExpression
 from behave.formatter.base import StreamOpener
 from behave.formatter import _registry as _format_registry
 from behave.userdata import UserData, parse_user_define
-from behave._types import Unknown
 
 # -- PYTHON 2/3 COMPATIBILITY:
 # SINCE Python 3.2: ConfigParser = SafeConfigParser

@@ -6,7 +6,6 @@ REQUIRES: importlib (provided in Python2.7, Python3.2...)
 """
 
 from __future__ import absolute_import
-from behave._types import Unknown
 import importlib
 
 def parse_scoped_name(scoped_name):
