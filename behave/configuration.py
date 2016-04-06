@@ -17,6 +17,7 @@ from behave.tag_expression import TagExpression
 from behave.formatter.base import StreamOpener
 from behave.formatter import _registry as _format_registry
 from behave.userdata import UserData, parse_user_define
+from behave._types import Unknown
 
 # -- PYTHON 2/3 COMPATIBILITY:
 # SINCE Python 3.2: ConfigParser = SafeConfigParser
@@ -37,7 +38,6 @@ class LogLevel(object):
     def parse(levelname, unknown_level=None):
         """
         Convert levelname into a numeric log level.
-
         :param levelname: Logging levelname (as string)
         :param unknown_level: Used if levelname is unknown (optional).
         :return: Numeric log-level or unknown_level, if levelname is unknown.
@@ -87,17 +87,6 @@ options = [
           metavar="NAME=VALUE",
           help="""Define user-specific data for the config.userdata dictionary.
                   Example: -D foo=bar to store it in config.userdata["foo"].""")),
-
-    (('--processes',),
-     dict(metavar="NUMBER", dest='proc_count',
-          help="""Use multiple pids to do the work faster.
-          Not all options work properly under parallel mode. See README.md""")),
-
-    (('--parallel-element',),
-     dict(metavar="STRING", dest='parallel_element',
-          help="""If you used the --processes option, then this will control how the tests get parallelized. Valid
-          values are 'feature' or 'scenario'. Anything else will error.
-          See readme for more info on how this works.""")),
 
     (('-e', '--exclude'),
      dict(metavar="PATTERN", dest='exclude_re',
@@ -525,7 +514,6 @@ class Configuration(object):
           * loads the configuration defaults (if needed).
           * process the command-line args
           * store the configuration results
-
         :param command_args: Provide command args (as sys.argv).
             If command_args is None, sys.argv[1:] is used.
         :type command_args: list<str>, str
@@ -667,7 +655,6 @@ class Configuration(object):
         """
         Build regular expression for scenario selection by name
         by using a list of name parts or name regular expressions.
-
         :param names: List of name parts or regular expressions (as text).
         :return: Compiled regular expression to use.
         """
@@ -689,16 +676,13 @@ class Configuration(object):
         Support simple setup of logging subsystem.
         Ensures that the logging level is set.
         But note that the logging setup can only occur once.
-
         SETUP MODES:
           * :func:`logging.config.fileConfig()`, if ``configfile`` is provided.
           * :func:`logging.basicConfig()`, otherwise.
-
         .. code-block: python
             # -- FILE: features/environment.py
             def before_all(context):
                 context.config.setup_logging()
-
         :param level:       Logging level of root logger.
                             If None, use :attr:`logging_level` value.
         :param configfile:  Configuration filename for fileConfig() setup.
@@ -726,17 +710,13 @@ class Configuration(object):
     def setup_stage(self, stage=None):
         """Setup the test stage that selects a different set of
         steps and environment implementations.
-
         :param stage:   Name of current test stage (as string or None).
-
         EXAMPLE::
-
             # -- SETUP DEFAULT TEST STAGE (unnamed):
             config = Configuration()
             config.setup_stage()
             assert config.steps_dir == "steps"
             assert config.environment_file == "environment.py"
-
             # -- SETUP PRODUCT TEST STAGE:
             config.setup_stage("product")
             assert config.steps_dir == "product_steps"

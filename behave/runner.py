@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
 
+
 import contextlib
 import logging
+import os
+import io
 import re
-import time
-import os.path
 import six
-from io import StringIO
+from six import StringIO
 import sys
 import traceback
 import warnings
 import weakref
+import time
 import collections
 
 from behave import matchers
 from behave.step_registry import setup_step_decorators
-from behave.formatter._registry import make_formatters
+from behave.formatter import formatters
 from behave.configuration import ConfigError
 from behave.log_capture import LoggingCapture
 from behave.runner_util import collect_feature_locations, parse_features
@@ -210,8 +212,8 @@ class Context(object):
 
     def _dump(self):
         for level, frame in enumerate(self._stack):
-            print('Level %d' % level)
-            print(repr(frame))
+            print(('Level %d' % level))
+            print((repr(frame)))
 
     def __getattr__(self, attr):
         if attr[0] == '_':
@@ -290,7 +292,7 @@ class Context(object):
             passed = step.run(self._runner, quiet=True, capture=False)
             if not passed:
                 # -- ISSUE #96: Provide more substep info to diagnose problem.
-                step_line = u"%s %s" % (step.keyword, step.name)
+                step_line = "%s %s" % (step.keyword, step.name)
                 message = "%s SUB-STEP: %s" % (step.status.upper(), step_line)
                 if step.error_message:
                     message += "\nSubstep info: %s" % step.error_message
@@ -364,171 +366,7 @@ class PathManager(object):
             self.paths.append(path)
 
 
-class ModelRunner(object):
-    """
-    Test runner for a behave model (features).
-    Provides the core functionality of a test runner and
-    the functional API needed by model elements.
-
-    .. attribute:: aborted
-
-          This is set to true when the user aborts a test run
-          (:exc:`KeyboardInterrupt` exception). Initially: False.
-          Stored as derived attribute in :attr:`Context.aborted`.
-    """
-
-    def __init__(self, config, features=None):
-        self.config = config
-        self.features = features or []
-        self.hooks = {}
-        self.formatters = []
-        self.undefined_steps = []
-
-        self.context = None
-        self.feature = None
-
-        self.stdout_capture = None
-        self.stderr_capture = None
-        self.log_capture = None
-        self.old_stdout = None
-        self.old_stderr = None
-
-    # @property
-    def _get_aborted(self):
-        value = False
-        if self.context:
-            value = self.context.aborted
-        return value
-
-    # @aborted.setter
-    def _set_aborted(self, value):
-        assert self.context
-        self.context._set_root_attribute('aborted', bool(value))
-
-    aborted = property(_get_aborted, _set_aborted,
-                       doc="Indicates that test run is aborted by the user.")
-
-    def run_hook(self, name, context, *args):
-        if not self.config.dry_run and (name in self.hooks):
-            # try:
-            with context.user_mode():
-                self.hooks[name](context, *args)
-            # except KeyboardInterrupt:
-            #     self.aborted = True
-            #     if name not in ("before_all", "after_all"):
-            #         raise
-
-    def setup_capture(self):
-        if not self.context:
-            self.context = Context(self)
-
-        if self.config.stdout_capture:
-            self.stdout_capture = StringIO()
-            self.context.stdout_capture = self.stdout_capture
-
-        if self.config.stderr_capture:
-            self.stderr_capture = StringIO()
-            self.context.stderr_capture = self.stderr_capture
-
-        if self.config.log_capture:
-            self.log_capture = LoggingCapture(self.config)
-            self.log_capture.inveigle()
-            self.context.log_capture = self.log_capture
-
-    def start_capture(self):
-        if self.config.stdout_capture:
-            # -- REPLACE ONLY: In non-capturing mode.
-            if not self.old_stdout:
-                self.old_stdout = sys.stdout
-                sys.stdout = self.stdout_capture
-            assert sys.stdout is self.stdout_capture
-
-        if self.config.stderr_capture:
-            # -- REPLACE ONLY: In non-capturing mode.
-            if not self.old_stderr:
-                self.old_stderr = sys.stderr
-                sys.stderr = self.stderr_capture
-            assert sys.stderr is self.stderr_capture
-
-    def stop_capture(self):
-        if self.config.stdout_capture:
-            # -- RESTORE ONLY: In capturing mode.
-            if self.old_stdout:
-                sys.stdout = self.old_stdout
-                self.old_stdout = None
-            assert sys.stdout is not self.stdout_capture
-
-        if self.config.stderr_capture:
-            # -- RESTORE ONLY: In capturing mode.
-            if self.old_stderr:
-                sys.stderr = self.old_stderr
-                self.old_stderr = None
-            assert sys.stderr is not self.stderr_capture
-
-    def teardown_capture(self):
-        if self.config.log_capture:
-            self.log_capture.abandon()
-
-    def run_model(self, features=None):
-        if not self.context:
-            self.context = Context(self)
-        if features is None:
-            features = self.features
-
-        # -- ENSURE: context.execute_steps() works in weird cases (hooks, ...)
-        context = self.context
-        self.setup_capture()
-        self.run_hook('before_all', context)
-
-        run_feature = not self.aborted
-        failed_count = 0
-        undefined_steps_initial_size = len(self.undefined_steps)
-        for feature in features:
-            if run_feature:
-                try:
-                    self.feature = feature
-                    for formatter in self.formatters:
-                        formatter.uri(feature.filename)
-
-                    failed = feature.run(self)
-                    if failed:
-                        failed_count += 1
-                        if self.config.stop or self.aborted:
-                            # -- FAIL-EARLY: After first failure.
-                            run_feature = False
-                except KeyboardInterrupt:
-                    self.aborted = True
-                    failed_count += 1
-                    run_feature = False
-
-            # -- ALWAYS: Report run/not-run feature to reporters.
-            # REQUIRED-FOR: Summary to keep track of untested features.
-            for reporter in self.config.reporters:
-                reporter.feature(feature)
-
-        # -- AFTER-ALL:
-        if self.aborted:
-            print("\nABORTED: By user.")
-        for formatter in self.formatters:
-            formatter.close()
-        self.run_hook('after_all', self.context)
-        for reporter in self.config.reporters:
-            reporter.end()
-        # if self.aborted:
-        #     print("\nABORTED: By user.")
-        failed = ((failed_count > 0) or self.aborted or
-                  (len(self.undefined_steps) > undefined_steps_initial_size))
-        return failed
-
-    def run(self):
-        """
-        Implements the run method by running the model.
-        """
-        self.context = Context(self)
-        return self.run_model()
-
-
-class Runner(ModelRunner):
+class Runner(object):
     """
     Standard test runner for behave:
 
@@ -538,16 +376,55 @@ class Runner(ModelRunner):
       * select feature files, parses them and creates model (elements)
     """
     def __init__(self, config):
-        super(Runner, self).__init__(config)
-        self.path_manager = PathManager()
-        self.base_dir = None
+        self.config = config
+        self.hooks = {}
+        self.features= []
+        self.undefined = []
 
+
+        self.path_manager = PathManager()
+        self.feature = None
+
+        self.stdout_capture = None
+        self.stderr_capture = None
+        self.log_capture = None
+        self.old_stdout = None
+        self.old_stderr = None
+
+        self.base_dir = None
+        self.context = None
+        self.formatters = None
+
+    # @aborted.setter
+
+    def _get_aborted(self):
+        """
+        Indicates that a test run was aborted by the user
+        (:exc:`KeyboardInterrupt` exception).
+        Stored in :attr:`Context.aborted` attribute (as root attribute).
+        :return: Current aborted state, initially false.
+        :rtype: bool
+        """
+        value = False
+        if self.context:
+            value = self.context.aborted
+        return value
+
+    def _set_aborted(self, value):
+        """
+        Set the aborted value.
+        :param value: New aborted value (as bool).
+        """
+        assert self.context
+        self.context._set_root_attribute('aborted', bool(value))
+
+    aborted = property(_get_aborted, _set_aborted,
+                       doc="Indicates that test run is aborted by the user.")
 
     def setup_paths(self):
         if self.config.paths:
             if self.config.verbose:
-                print('Supplied path:', \
-                      ', '.join('"%s"' % path for path in self.config.paths))
+                print(('Supplied path:', ', '.join('"%s"' % path for path in self.config.paths)))
             first_path = self.config.paths[0]
             if hasattr(first_path, "filename"):
                 # -- BETTER: isinstance(first_path, FileLocation):
@@ -574,16 +451,15 @@ class Runner(ModelRunner):
         # Get the root. This is not guaranteed to be '/' because Windows.
         root_dir = path_getrootdir(base_dir)
         new_base_dir = base_dir
-        steps_dir = self.config.steps_dir
-        environment_file = self.config.environment_file
+
 
         while True:
             if self.config.verbose:
-                print('Trying base directory:', new_base_dir)
+                print(('Trying base directory:', new_base_dir))
 
-            if os.path.isdir(os.path.join(new_base_dir, steps_dir)):
+            if os.path.isdir(os.path.join(new_base_dir, 'steps')):
                 break
-            if os.path.isfile(os.path.join(new_base_dir, environment_file)):
+            if os.path.isfile(os.path.join(new_base_dir, 'environment')):
                 break
             if new_base_dir == root_dir:
                 break
@@ -593,15 +469,10 @@ class Runner(ModelRunner):
         if new_base_dir == root_dir:
             if self.config.verbose:
                 if not self.config.paths:
-                    print('ERROR: Could not find "%s" directory. '\
-                          'Please specify where to find your features.' % \
-                                steps_dir)
+                    print('ERROR: Could not find "steps" directory. Please specify where to find your features.')
                 else:
-                    print('ERROR: Could not find "%s" directory in your '\
-                        'specified path "%s"' % (steps_dir, base_dir))
-
-            message = 'No %s directory in "%s"' % (steps_dir, base_dir)
-            raise ConfigError(message)
+                    print(('ERROR: Could not find "steps" directory in your specified path "%s"' % base_dir))
+            raise ConfigError('No steps directory in "%s"' % base_dir)
 
         base_dir = new_base_dir
         self.config.base_dir = base_dir
@@ -612,11 +483,9 @@ class Runner(ModelRunner):
         else:
             if self.config.verbose:
                 if not self.config.paths:
-                    print('ERROR: Could not find any "<name>.feature" files. '\
-                        'Please specify where to find your features.')
+                    print('ERROR: Could not find any "<name>.feature" files. Please specify where to find your features.')
                 else:
-                    print('ERROR: Could not find any "<name>.feature" files '\
-                        'in your specified path "%s"' % base_dir)
+                    print(('ERROR: Could not find any "<name>.feature" files in your specified path "%s"' % base_dir))
             raise ConfigError('No feature files in "%s"' % base_dir)
 
         self.base_dir = base_dir
@@ -645,14 +514,13 @@ class Runner(ModelRunner):
 
     def load_step_definitions(self, extra_step_paths=[]):
         step_globals = {
-            'use_step_matcher': matchers.use_step_matcher,
-            'step_matcher':     matchers.step_matcher, # -- DEPRECATING
+            'step_matcher':     matchers.step_matcher,
         }
         setup_step_decorators(step_globals)
 
         # -- Allow steps to import other stuff from the steps dir
         # NOTE: Default matcher can be overridden in "environment.py" hook.
-        steps_dir = os.path.join(self.base_dir, self.config.steps_dir)
+        steps_dir = os.path.join(self.base_dir, 'steps')
         paths = [steps_dir] + list(extra_step_paths)
         with PathManager(paths):
             default_matcher = matchers.current_matcher
@@ -671,6 +539,16 @@ class Runner(ModelRunner):
                         #     e_text = _text(e)
                         #     print("Exception %s: %s" % (e.__class__.__name__, e_text))
                         #     raise
+
+    def run_hook(self, name, context, *args):
+        if not self.config.dry_run and (name in self.hooks):
+            # try:
+            with context.user_mode():
+                self.hooks[name](context, *args)
+            # except KeyboardInterrupt:
+            #     self.aborted = True
+            #     if name not in ("before_all", "after_all"):
+            #         raise
 
     def feature_locations(self):
         return collect_feature_locations(self.config.paths)
@@ -692,21 +570,20 @@ class Runner(ModelRunner):
 
         # -- ENSURE: context.execute_steps() works in weird cases (hooks, ...)
         self.setup_capture()
-        self.run_hook('before_all', self.context)
+        self.run_hook('before_all', context)
 
         # -- STEP: Parse all feature files (by using their file location).
-        feature_locations = [filename for filename in self.feature_locations()
-                                    if not self.config.exclude(filename)]
+        feature_locations = [ filename for filename in self.feature_locations()
+                                    if not self.config.exclude(filename) ]
         features = parse_features(feature_locations, language=self.config.lang)
         self.features.extend(features)
 
+        # -- STEP: Multi-processing!
         if getattr(self.config, 'proc_count'):
             return self.run_multiproc()
 
         # -- STEP: Run all features.
-        stream_openers = self.config.outputs
-        self.formatters = make_formatters(self.config, stream_openers)
-        return self.run_model()
+        self.formatters = formatters.get_formatter(self.config, stream_openers)
         undefined_steps_initial_size = len(self.undefined)
         run_feature = True
         for feature in features:
@@ -761,11 +638,12 @@ class Runner(ModelRunner):
             self.parallel_element = 'scenario'
             print("INFO: Without giving --parallel-element, defaulting to 'scenario'...")
         else:
-            if self.parallel_element != 'feature' and self.parallel_element != 'scenario':
-                print ("ERROR: When using --processes, --parallel-element"
-                " option must be set to 'feature' or 'scenario'. You gave '"+
-                str(self.parallel_element)+"', which isn't valid.")
-                return 1
+            if self.parallel_element != 'feature' and \
+                self.parallel_element != 'scenario':
+                    print(("ERROR: When using --processes, --parallel-element"
+                    " option must be set to 'feature' or 'scenario'. You gave '"+
+                    str(self.parallel_element)+"', which isn't valid."))
+                    return 1
 
         # -- Prevent context warnings.
         def do_nothing(obj2, obj3):
@@ -799,10 +677,10 @@ class Runner(ModelRunner):
                         scenario_count += 1
 
         proc_count = int(getattr(self.config, 'proc_count'))
-        print ("INFO: {0} scenario(s) and {1} feature(s) queued for"
+        print(("INFO: {0} scenario(s) and {1} feature(s) queued for"
                 " consideration by {2} workers. Some may be skipped if the"
                 " -t option was given..."
-               .format(scenario_count, feature_count, proc_count))
+               .format(scenario_count, feature_count, proc_count)))
         time.sleep(2)
 
         procs = []
@@ -822,14 +700,14 @@ class Runner(ModelRunner):
             except Exception as e:
                 break
             current_job = self.joblist[joblist_index]
-            writebuf = StringIO()
+            writebuf = io.StringIO()
             self.setfeature(current_job)
             self.config.outputs = []
             self.config.outputs.append(StreamOpener(stream=writebuf))
 
             stream_openers = self.config.outputs
 
-            self.formatters = make_formatters(self.config, stream_openers)
+            self.formatters = formatters.get_formatter(self.config, stream_openers)
 
             for formatter in self.formatters:
                 formatter.uri(current_job.filename)
@@ -844,7 +722,7 @@ class Runner(ModelRunner):
                 for reporter in self.config.reporters:
                     reporter.feature(current_job)
 
-            self.clean_buffer(writebuf)
+            # self.clean_buffer(writebuf)
             job_report_text = self.generatereport(
                 proc_number, current_job,
                 start_time, end_time, writebuf)
@@ -860,18 +738,15 @@ class Runner(ModelRunner):
                 results['reportinginfo'] = job_report_text
                 results['status'] = current_job.status
                 if current_job.type != 'feature':
-                    results['uniquekey'] = \
-                    current_job.filename + current_job.feature.name
+                    results['uniquekey'] = current_job.filename + current_job.feature.name
                 else:
                     results['scenarios_passed'] = 0
                     results['scenarios_failed'] = 0
                     results['scenarios_skipped'] = 0
                     self.countscenariostatus(current_job, results)
                 self.countstepstatus(current_job, results)
-                if current_job.type != 'feature' and \
-                    getattr(self.config, 'junit'):
-                        results['junit_report'] = \
-                        self.generate_junit_report(current_job, writebuf)
+                if current_job.type != 'feature' and getattr(self.config, 'junit'):
+                        results['junit_report'] = self.generate_junit_report(current_job, writebuf)
                 self.resultsqueue.put(results)
 
     def setfeature(self, current_job):
@@ -928,8 +803,7 @@ class Runner(ModelRunner):
 
     def countscenariostatus(self, current_job, results):
         if current_job.type != 'scenario':
-            [self.countscenariostatus(
-                s, results) for s in current_job.scenarios]
+            [self.countscenariostatus(s, results) for s in current_job.scenarios]
         else:
             results['scenarios_' + current_job.status] += 1
 
@@ -983,13 +857,13 @@ class Runner(ModelRunner):
 
         print("\n" * 3)
         print("_" * 75)
-        print ("{0} features passed, {1} features failed, {2} features skipped\n"
+        print(("{0} features passed, {1} features failed, {2} features skipped\n"
                "{3} scenarios passed, {4} scenarios failed, {5} scenarios skipped\n"
                "{6} steps passed, {7} steps failed, {8} steps skipped, {9} steps undefined\n")\
                 .format(
                 metrics['features_passed'], metrics['features_failed'], metrics['features_skipped'],
                 metrics['scenarios_passed'], metrics['scenarios_failed'], metrics['scenarios_skipped'],
-                metrics['steps_passed'], metrics['steps_failed'], metrics['steps_skipped'], metrics['steps_undefined'])
+                metrics['steps_passed'], metrics['steps_failed'], metrics['steps_skipped'], metrics['steps_undefined']))
         if getattr(self.config,'junit'):
             self.write_paralleltestresults_to_junitfile(junit_report_objs)
         return metrics['features_failed']
@@ -1146,17 +1020,17 @@ class Runner(ModelRunner):
             filename = outputdir+"/"+"TESTS-"
             filename += feature_reports[uniquekey]['filebasename']
             filename += ".xml"
-            fd = open(filename,"w")
+            fd = open(filename,"wb")
             fd.write(filedata.encode('utf8'))
             fd.close()
 
     def setup_capture(self):
         if self.config.stdout_capture:
-            self.stdout_capture = StringIO()
+            self.stdout_capture = io.StringIO()
             self.context.stdout_capture = self.stdout_capture
 
         if self.config.stderr_capture:
-            self.stderr_capture = StringIO()
+            self.stderr_capture = io.StringIO()
             self.context.stderr_capture = self.stderr_capture
 
         if self.config.log_capture:
@@ -1184,15 +1058,15 @@ class Runner(ModelRunner):
         if self.config.log_capture:
             self.log_capture.abandon()
 
-    def clean_buffer(self, buf):
-        buflist = buf.readlines()
-        for i in range(len(buflist)):
-            buflist[i] = self.to_unicode(buflist[i])
+    # def clean_buffer(self, buf):
+    #     for i in range(len(buf.buflist)):
+    #         buf.buflist[i] = self.to_unicode(buf.buflist[i])
+
 
     @staticmethod
     def to_unicode(var):
         string = str(var) if isinstance(var, int) else var
-        return string.encode("utf-8") if isinstance(string, str) else string
+        return str(string, "utf-8",  errors='replace') if isinstance(string, str) else string
 
 
 
