@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from behave import StepRegistry
+from behave.step_registry import *
 from behave.textutil import text as _text
 import copy
 import difflib
