@@ -621,7 +621,7 @@ class Runner(object):
         #     print "\nABORTED: By user."
 
         failed = ((failed_count > 0) or self.aborted or
-                  (len(self.undefined) > undefined_steps_initial_size))
+                  (len(self.undefined_steps) > undefined_steps_initial_size))
         return failed
 
 
