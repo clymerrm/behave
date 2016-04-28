@@ -584,7 +584,7 @@ class Runner(object):
 
         # -- STEP: Run all features.
         self.formatters = make_formatters(self.config, stream_openers)
-        undefined_steps_initial_size = len(self.undefined)
+        undefined_steps_initial_size = len(self.undefined_steps)
         run_feature = True
         for feature in features:
             if run_feature:
