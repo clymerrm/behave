@@ -22,6 +22,7 @@ from behave.configuration import ConfigError
 from behave.log_capture import LoggingCapture
 from behave.runner_util import collect_feature_locations, parse_features
 from behave.formatter.base import StreamOpener
+from behave.reporter.converter import convert
 
 multiprocessing = None
 try:
@@ -911,6 +912,7 @@ class Runner(object):
         report_string += self.get_junit_stdoutstderr(cj,loglines)
         report_string += "</testcase>"
         report_obj['report_string'] = report_string
+        report_obj = convert(report_obj)
         return report_obj
 
     def get_junit_stdoutstderr(self, cj, loglines):
