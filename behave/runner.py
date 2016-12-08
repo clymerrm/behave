@@ -22,6 +22,7 @@ from behave.configuration import ConfigError
 from behave.log_capture import LoggingCapture
 from behave.runner_util import collect_feature_locations, parse_features
 from behave.formatter.base import StreamOpener
+from behave.reporter.converter import convert
 
 multiprocessing = None
 try:
@@ -379,7 +380,7 @@ class Runner(object):
         self.config = config
         self.hooks = {}
         self.features= []
-        self.undefined = []
+        self.undefined_steps = []
 
 
         self.path_manager = PathManager()
@@ -901,6 +902,7 @@ class Runner(object):
         report_string += self.get_junit_stdoutstderr(cj,loglines)
         report_string += "</testcase>"
         report_obj['report_string'] = report_string
+        report_obj = convert(report_obj)
         return report_obj
 
     def get_junit_stdoutstderr(self, cj, loglines):
@@ -1066,7 +1068,7 @@ class Runner(object):
     @staticmethod
     def to_unicode(var):
         string = str(var) if isinstance(var, int) else var
-        return str(string, "utf-8",  errors='replace') if isinstance(string, str) else string
+        return str(string) if isinstance(string, str) else string
 
 
 
