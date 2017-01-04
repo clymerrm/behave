@@ -1477,6 +1477,7 @@ class Step(BasicStatement, Replayable):
             self.store_exception_context(e)
 
         self.duration = time.time() - start
+        runner.run_hook('after_step', runner.context, self)
         if capture:
             runner.stop_capture()
 
@@ -1507,7 +1508,6 @@ class Step(BasicStatement, Replayable):
             for formatter in runner.formatters:
                 formatter.result(self)
 
-        runner.run_hook('after_step', runner.context, self)
         return keep_going
 
 
