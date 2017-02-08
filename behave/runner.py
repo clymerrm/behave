@@ -686,6 +686,9 @@ class Runner(object):
 
         print(proc_count)
         procs = []
+        multiprocessing.log_to_stderr()
+        logger = multiprocessing.get_logger()
+        logger.setLevel(logging.INFO)
         for i in range(proc_count):
             p = multiprocessing.Process(target=self.worker, args=(i, ))
             procs.append(p)
@@ -710,8 +713,6 @@ class Runner(object):
                 joblist_index = self.joblist_index_queue.get_nowait()
             except Exception as e:
                 break
-            print(proc_number)
-            print(self.joblist)
             current_job = self.joblist[joblist_index]
             writebuf = io.StringIO()
             self.setfeature(current_job)
