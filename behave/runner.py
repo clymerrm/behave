@@ -698,10 +698,12 @@ class Runner(object):
 
         for p in procs:
             print(p)
+            print('proc start')
             p.start()
 
         for p in procs:
             print(procs)
+            print('proc join')
             p.join()
 
         self.run_hook('after_all', self.context)
@@ -720,7 +722,6 @@ class Runner(object):
             self.config.outputs.append(StreamOpener(stream=writebuf))
 
             stream_openers = self.config.outputs
-            print(stream_openers)
 
             self.formatters = make_formatters(self.config, stream_openers)
 
