@@ -734,7 +734,8 @@ class Runner(object):
                 for reporter in self.config.reporters:
                     reporter.feature(current_job)
 
-            self.clean_buffer(writebuf)
+            print(writebuf)
+            # self.clean_buffer(writebuf)
             job_report_text = self.generatereport(
                 proc_number, current_job,
                 start_time, end_time, writebuf)
