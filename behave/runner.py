@@ -708,13 +708,14 @@ class Runner(object):
         return self.multiproc_fullreport()
 
     def worker(self, proc_number):
+        print('starting job')
         while 1:
             try:
                 joblist_index = self.joblist_index_queue.get_nowait()
             except Exception as e:
-                print('something bad happened')
                 break
             current_job = self.joblist[joblist_index]
+            print(current_job)
             writebuf = io.StringIO()
             self.setfeature(current_job)
             self.config.outputs = []
