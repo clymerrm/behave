@@ -710,6 +710,7 @@ class Runner(object):
                 joblist_index = self.joblist_index_queue.get_nowait()
             except Exception as e:
                 break
+            print(self.joblist)
             current_job = self.joblist[joblist_index]
             writebuf = io.StringIO()
             self.setfeature(current_job)
