@@ -714,6 +714,8 @@ class Runner(object):
             except Exception as e:
                 break
             current_job = self.joblist[joblist_index]
+            print(proc_number)
+            print(current_job)
             writebuf = io.StringIO()
             self.setfeature(current_job)
             self.config.outputs = []
