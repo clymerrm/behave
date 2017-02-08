@@ -733,7 +733,7 @@ class Runner(object):
                 for reporter in self.config.reporters:
                     reporter.feature(current_job)
 
-            # self.clean_buffer(writebuf)
+            self.clean_buffer(writebuf)
             job_report_text = self.generatereport(
                 proc_number, current_job,
                 start_time, end_time, writebuf)
@@ -1070,9 +1070,9 @@ class Runner(object):
         if self.config.log_capture:
             self.log_capture.abandon()
 
-    # def clean_buffer(self, buf):
-    #     for i in range(len(buf.buflist)):
-    #         buf.buflist[i] = self.to_unicode(buf.buflist[i])
+    def clean_buffer(self, buf):
+        for i in range(len(buf.buflist)):
+            buf.buflist[i] = self.to_unicode(buf.buflist[i])
 
 
     @staticmethod
