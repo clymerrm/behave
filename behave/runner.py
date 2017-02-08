@@ -698,12 +698,10 @@ class Runner(object):
 
         for p in procs:
             print(p)
-            print('proc start')
             p.start()
 
         for p in procs:
             print(procs)
-            print('proc join')
             p.join()
 
         self.run_hook('after_all', self.context)
@@ -714,6 +712,7 @@ class Runner(object):
             try:
                 joblist_index = self.joblist_index_queue.get_nowait()
             except Exception as e:
+                print('something bad happened')
                 break
             current_job = self.joblist[joblist_index]
             writebuf = io.StringIO()
