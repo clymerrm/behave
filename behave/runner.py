@@ -711,7 +711,7 @@ class Runner(object):
         print(self.joblist_index_queue)
         print(self.joblist_index_queue.get_nowait())
         pool = multiprocessing.Pool(proc_count)
-        results = pool.map(self.worker, self.joblist_index_queue)
+        results = pool.map(self.worker, self.joblist)
         print(results)
         pool.close()
         pool.join()
@@ -726,9 +726,7 @@ class Runner(object):
             #     joblist_index = self.joblist_index_queue.get_nowait()
             # except Exception as e:
             #     break
-            current_job_index = self.joblist_index_queue[job]
-            current_job = self.joblist[current_job_index]
-            print(current_job)
+            current_job = job
             writebuf = io.StringIO()
             self.setfeature(current_job)
             self.config.outputs = []
