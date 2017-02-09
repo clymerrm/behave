@@ -702,6 +702,7 @@ class Runner(object):
         for p in procs:
             print(p)
             p.start()
+            time.sleep(1)
 
         for p in procs:
             print(procs)
