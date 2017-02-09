@@ -700,11 +700,11 @@ class Runner(object):
         print(procs)
 
         for p in procs:
-            print(p)
+            print('START: ' + str(p))
             p.start()
 
         for p in procs:
-            print(procs)
+            print('JOIN: ' + str(procs))
             p.join()
 
         self.run_hook('after_all', self.context)
