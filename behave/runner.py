@@ -659,6 +659,7 @@ class Runner(object):
         joblist = []
         scenario_count = 0
         feature_count = 0
+        print(self.features)
         for feature in self.features:
             if self.parallel_element == 'feature' or 'serial' in feature.tags:
                 print(feature)
