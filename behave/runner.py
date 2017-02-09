@@ -707,6 +707,7 @@ class Runner(object):
        #      print(procs)
        #      p.join()
 
+        print(self.joblist)
         pool = multiprocessing.Pool(proc_count)
         results = pool.map(self.worker, self.joblist)
         print(results)
