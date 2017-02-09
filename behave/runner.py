@@ -711,7 +711,7 @@ class Runner(object):
         print(self.joblist_index_queue)
         print(self.joblist_index_queue.get_nowait())
         pool = multiprocessing.Pool(proc_count)
-        results = pool.map(self.worker, self.joblist)
+        results = pool.map(self.worker, self.joblist_index_queue)
         print(results)
         pool.close()
         pool.join()
@@ -719,14 +719,15 @@ class Runner(object):
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
 
-    def worker(self, proc_number):
+    def worker(self, job):
         print('starting job')
         while 1:
-            try:
-                joblist_index = self.joblist_index_queue.get_nowait()
-            except Exception as e:
-                break
-            current_job = self.joblist[joblist_index]
+            # try:
+            #     joblist_index = self.joblist_index_queue.get_nowait()
+            # except Exception as e:
+            #     break
+            current_job_index = self.joblist_index_queue[job]
+            current_job = self.joblist[current_job_index]
             print(current_job)
             writebuf = io.StringIO()
             self.setfeature(current_job)
@@ -752,8 +753,8 @@ class Runner(object):
 
             # self.clean_buffer(writebuf)
             job_report_text = self.generatereport(
-                proc_number, current_job,
-                start_time, end_time, writebuf)
+                # proc_number
+                current_job, start_time, end_time, writebuf)
 
             if job_report_text:
                 results = dict()
