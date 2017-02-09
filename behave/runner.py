@@ -661,6 +661,7 @@ class Runner(object):
         feature_count = 0
         for feature in self.features:
             if self.parallel_element == 'feature' or 'serial' in feature.tags:
+                print(feature)
                 joblist.append(feature)
                 self.joblist_index_queue.put(feature_count + scenario_count)
                 feature_count += 1
