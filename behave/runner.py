@@ -695,9 +695,8 @@ class Runner(object):
         for i in range(proc_count):
             p = multiprocessing.Process(target=self.worker, args=(i, ))
             p.start()
-            p.terminate()
-            p.join()
-            # procs.append(p)
+            # p.join()
+            procs.append(p)
        # [p.join() for p in procs]
 
         #
@@ -705,9 +704,9 @@ class Runner(object):
         #     print('START: ' + str(p))
         #     p.start()
 
-        # for p in procs:
-        #     print('JOIN: ' + str(procs))
-        #     p.join()
+        for p in procs:
+            print('JOIN: ' + str(procs))
+            p.join()
 
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
