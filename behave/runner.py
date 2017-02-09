@@ -702,7 +702,6 @@ class Runner(object):
         for p in procs:
             print(p)
             p.start()
-            time.sleep(3)
 
         for p in procs:
             print(procs)
@@ -712,12 +711,13 @@ class Runner(object):
         return self.multiproc_fullreport()
 
     def worker(self, proc_number):
-        while 1:
+        while self.joblist_index_queue.qsize() > 0:
+            print('QUEUE DATA: ' + str(self.joblist_index_queue.get_nowait()))
             try:
                 joblist_index = self.joblist_index_queue.get_nowait()
             except Queue.Empty:
-                if self.joblist_index_queue.qsize() < 1:
-                    break
+                print(self.joblist_index_queue.get_nowait())
+                break
             current_job = self.joblist[joblist_index]
             writebuf = io.StringIO()
             self.setfeature(current_job)
