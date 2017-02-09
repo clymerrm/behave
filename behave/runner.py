@@ -688,13 +688,14 @@ class Runner(object):
         print(proc_count)
         multiprocessing.log_to_stderr()
         logger = multiprocessing.get_logger()
-        logger.setLevel(logging.INFO)
+        logger.setLevel(logging.DEBUG)
 
         procs = []
 
         for i in range(proc_count):
             p = multiprocessing.Process(target=self.worker, args=(i, ))
             procs.append(p)
+            p.start()
        # [p.join() for p in procs]
 
         print(procs)
