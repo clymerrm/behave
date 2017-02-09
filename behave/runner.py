@@ -656,26 +656,24 @@ class Runner(object):
         self.joblist_index_queue = multiprocessing.Manager().JoinableQueue()
         self.resultsqueue = multiprocessing.Manager().JoinableQueue()
 
-        joblist = []
+        self.joblist = []
         scenario_count = 0
         feature_count = 0
-        print(self.features)
         for feature in self.features:
             if self.parallel_element == 'feature' or 'serial' in feature.tags:
-                print(feature)
-                joblist.append(feature)
+                self.joblist.append(feature)
                 self.joblist_index_queue.put(feature_count + scenario_count)
                 feature_count += 1
                 continue
             for scenario in feature.scenarios:
                 if scenario.type == 'scenario':
-                    joblist.append(scenario)
+                    self.joblist.append(scenario)
                     self.joblist_index_queue.put(
                         feature_count + scenario_count)
                     scenario_count += 1
                 else:
                     for subscenario in scenario.scenarios:
-                        joblist.append(subscenario)
+                        self.joblist.append(subscenario)
                         self.joblist_index_queue.put(
                             feature_count + scenario_count)
                         scenario_count += 1
@@ -709,13 +707,11 @@ class Runner(object):
        #      print(procs)
        #      p.join()
 
-        print(joblist)
+        print(self.joblist)
         print(self.joblist_index_queue)
         print(self.joblist_index_queue.get_nowait())
-        import dill
-        jobs = dill.loads(dill.dumps(joblist))
         pool = multiprocessing.Pool(proc_count)
-        results = pool.map(self.worker, jobs)
+        results = pool.map(self.worker, range(0, len(self.joblist)))
         print(results)
         pool.close()
         pool.join()
@@ -730,7 +726,7 @@ class Runner(object):
             #     joblist_index = self.joblist_index_queue.get_nowait()
             # except Exception as e:
             #     break
-        current_job = job
+        current_job = self.joblist[job]
         writebuf = io.StringIO()
         self.setfeature(current_job)
         self.config.outputs = []
