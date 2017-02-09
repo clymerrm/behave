@@ -27,6 +27,7 @@ from behave.reporter.converter import convert
 multiprocessing = None
 try:
     import multiprocessing
+
 except ImportError as e:
     pass
 
@@ -685,24 +686,32 @@ class Runner(object):
         time.sleep(2)
 
         print(proc_count)
-        procs = []
         multiprocessing.log_to_stderr()
         logger = multiprocessing.get_logger()
         logger.setLevel(logging.INFO)
-        for i in range(proc_count):
-            p = multiprocessing.Process(target=self.worker, args=(i, ))
-            procs.append(p)
-       # [p.join() for p in procs]
 
-        print(procs)
+       #  procs = []
+       #
+       #  for i in range(proc_count):
+       #      p = multiprocessing.Process(target=self.worker, args=(i, ))
+       #      procs.append(p)
+       # # [p.join() for p in procs]
+       #
+       #  print(procs)
+       #
+       #  for p in procs:
+       #      print(p)
+       #      p.start()
+       #
+       #  for p in procs:
+       #      print(procs)
+       #      p.join()
 
-        for p in procs:
-            print(p)
-            p.start()
-
-        for p in procs:
-            print(procs)
-            p.join()
+        pool = multiprocessing.Pool(proc_count)
+        results = pool.map(self.worker, self.joblist)
+        print(results)
+        pool.close()
+        pool.join()
 
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
