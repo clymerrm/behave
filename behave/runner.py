@@ -710,10 +710,10 @@ class Runner(object):
         print(joblist)
         print(self.joblist_index_queue)
         print(self.joblist_index_queue.get_nowait())
-        import pickle
-        jobs = pickle.dumps(joblist)
+        import dill
+        jobs = dill.loads(dill.dumps(joblist))
         pool = multiprocessing.Pool(proc_count)
-        results = pool.map(self.worker, joblist)
+        results = pool.map(self.worker, jobs)
         print(results)
         pool.close()
         pool.join()

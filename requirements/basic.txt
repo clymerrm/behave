@@ -11,6 +11,7 @@
 parse >= 1.6.3
 parse_type >= 0.3.4
 six >= 1.9
+dill >= 0.2.4
 
 # -- FOR PYTHON 2.6:
 # REQUIRES: pip >= 6.0
