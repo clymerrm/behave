@@ -708,10 +708,8 @@ class Runner(object):
        #      p.join()
 
         print(self.joblist)
-        print(self.joblist_index_queue)
-        print(self.joblist_index_queue.get_nowait())
         pool = multiprocessing.Pool(proc_count)
-        results = pool.map(self.worker, range(0, len(self.joblist)))
+        results = pool.map(self.worker, range(0, len(feature_count)))
         print(results)
         pool.close()
         pool.join()
