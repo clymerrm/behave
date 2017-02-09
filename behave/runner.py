@@ -713,6 +713,7 @@ class Runner(object):
 
     def worker(self, proc_number):
         while 1:
+            print(self.joblist_index_queue.get_nowait())
             try:
                 joblist_index = self.joblist_index_queue.get_nowait()
             except Exception as e:
