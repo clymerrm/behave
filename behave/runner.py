@@ -711,11 +711,10 @@ class Runner(object):
         return self.multiproc_fullreport()
 
     def worker(self, proc_number):
-        print(self.joblist_index_queue.qsize())
+        print('WORKER DATA: ' + str(proc_number) + str(self.joblist_index_queue.qsize() > 0))
         while self.joblist_index_queue.qsize() > 0:
             try:
                 joblist_index = self.joblist_index_queue.get_nowait()
-                print('QUEUE DATA: ' + str(self.joblist_index_queue.get_nowait()))
             except Queue.Empty:
                 print(self.joblist_index_queue.get_nowait())
                 break
