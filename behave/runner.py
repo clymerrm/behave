@@ -695,7 +695,6 @@ class Runner(object):
         for i in range(proc_count):
             p = multiprocessing.Process(target=self.worker, args=(i, ))
             procs.append(p)
-            p.start()
        # [p.join() for p in procs]
 
         print(procs)
