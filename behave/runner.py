@@ -711,6 +711,7 @@ class Runner(object):
         return self.multiproc_fullreport()
 
     def worker(self, proc_number):
+        print(self.joblist_index_queue.qsize())
         while self.joblist_index_queue.qsize() > 0:
             try:
                 joblist_index = self.joblist_index_queue.get_nowait()
