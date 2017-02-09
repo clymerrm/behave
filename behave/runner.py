@@ -656,24 +656,24 @@ class Runner(object):
         self.joblist_index_queue = multiprocessing.Manager().JoinableQueue()
         self.resultsqueue = multiprocessing.Manager().JoinableQueue()
 
-        self.joblist = []
+        joblist = []
         scenario_count = 0
         feature_count = 0
         for feature in self.features:
             if self.parallel_element == 'feature' or 'serial' in feature.tags:
-                self.joblist.append(feature)
+                joblist.append(feature)
                 self.joblist_index_queue.put(feature_count + scenario_count)
                 feature_count += 1
                 continue
             for scenario in feature.scenarios:
                 if scenario.type == 'scenario':
-                    self.joblist.append(scenario)
+                    joblist.append(scenario)
                     self.joblist_index_queue.put(
                         feature_count + scenario_count)
                     scenario_count += 1
                 else:
                     for subscenario in scenario.scenarios:
-                        self.joblist.append(subscenario)
+                        joblist.append(subscenario)
                         self.joblist_index_queue.put(
                             feature_count + scenario_count)
                         scenario_count += 1
@@ -707,11 +707,11 @@ class Runner(object):
        #      print(procs)
        #      p.join()
 
-        print(self.joblist)
+        print(joblist)
         print(self.joblist_index_queue)
         print(self.joblist_index_queue.get_nowait())
         import pickle
-        jobs = pickle.dumps(self.joblist)
+        jobs = pickle.dumps(joblist)
         pool = multiprocessing.Pool(proc_count)
         results = pool.map(self.worker, jobs)
         print(results)
