@@ -837,7 +837,6 @@ class Runner(object):
             print(("\n" * 3))
             print(("_" * 75))
             jobresult = self.resultsqueue.get()
-            print(jobresult)
 
             try:
                 print((self.to_unicode(jobresult['reportinginfo'])))
