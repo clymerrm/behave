@@ -27,7 +27,7 @@ from behave.reporter.converter import convert
 multiprocessing = None
 try:
     import multiprocessing
-
+    import Queue
 except ImportError as e:
     pass
 
@@ -702,7 +702,7 @@ class Runner(object):
         for p in procs:
             print(p)
             p.start()
-            time.sleep(1)
+            time.sleep(3)
 
         for p in procs:
             print(procs)
@@ -713,59 +713,59 @@ class Runner(object):
 
     def worker(self, proc_number):
         while 1:
-            joblist_index = self.joblist_index_queue.get_nowait()
-            if str(joblist_index) == 'queue.Empty':
-                print('EMPTY')
-                break
-            else:
-                current_job = self.joblist[joblist_index]
-                writebuf = io.StringIO()
-                self.setfeature(current_job)
-                self.config.outputs = []
-                self.config.outputs.append(StreamOpener(stream=writebuf))
+            try:
+                joblist_index = self.joblist_index_queue.get_nowait()
+            except Queue.Empty:
+                if self.joblist_index_queue.qsize() < 1:
+                    break
+            current_job = self.joblist[joblist_index]
+            writebuf = io.StringIO()
+            self.setfeature(current_job)
+            self.config.outputs = []
+            self.config.outputs.append(StreamOpener(stream=writebuf))
 
-                stream_openers = self.config.outputs
+            stream_openers = self.config.outputs
 
-                self.formatters = make_formatters(self.config, stream_openers)
+            self.formatters = make_formatters(self.config, stream_openers)
 
-                for formatter in self.formatters:
-                    formatter.uri(current_job.filename)
+            for formatter in self.formatters:
+                formatter.uri(current_job.filename)
 
-                start_time = time.strftime("%Y-%m-%d %H:%M:%S")
-                current_job.run(self)
-                end_time = time.strftime("%Y-%m-%d %H:%M:%S")
+            start_time = time.strftime("%Y-%m-%d %H:%M:%S")
+            current_job.run(self)
+            end_time = time.strftime("%Y-%m-%d %H:%M:%S")
 
-                sys.stderr.write(current_job.status[0]+"\n")
+            sys.stderr.write(current_job.status[0]+"\n")
 
-                if current_job.type == 'feature':
-                    for reporter in self.config.reporters:
-                        reporter.feature(current_job)
+            if current_job.type == 'feature':
+                for reporter in self.config.reporters:
+                    reporter.feature(current_job)
 
-                # self.clean_buffer(writebuf)
-                job_report_text = self.generatereport(
-                    proc_number, current_job, start_time, end_time, writebuf)
+            # self.clean_buffer(writebuf)
+            job_report_text = self.generatereport(
+                proc_number, current_job, start_time, end_time, writebuf)
 
-                if job_report_text:
-                    results = dict()
-                    results['steps_passed'] = 0
-                    results['steps_failed'] = 0
-                    results['steps_skipped'] = 0
-                    results['steps_undefined'] = 0
-                    results['steps_untested'] = 0
-                    results['jobtype'] = current_job.type
-                    results['reportinginfo'] = job_report_text
-                    results['status'] = current_job.status
-                    if current_job.type != 'feature':
-                        results['uniquekey'] = current_job.filename + current_job.feature.name
-                    else:
-                        results['scenarios_passed'] = 0
-                        results['scenarios_failed'] = 0
-                        results['scenarios_skipped'] = 0
-                        self.countscenariostatus(current_job, results)
-                    self.countstepstatus(current_job, results)
-                    if current_job.type != 'feature' and getattr(self.config, 'junit'):
-                            results['junit_report'] = self.generate_junit_report(current_job, writebuf)
-                    self.resultsqueue.put(results)
+            if job_report_text:
+                results = dict()
+                results['steps_passed'] = 0
+                results['steps_failed'] = 0
+                results['steps_skipped'] = 0
+                results['steps_undefined'] = 0
+                results['steps_untested'] = 0
+                results['jobtype'] = current_job.type
+                results['reportinginfo'] = job_report_text
+                results['status'] = current_job.status
+                if current_job.type != 'feature':
+                    results['uniquekey'] = current_job.filename + current_job.feature.name
+                else:
+                    results['scenarios_passed'] = 0
+                    results['scenarios_failed'] = 0
+                    results['scenarios_skipped'] = 0
+                    self.countscenariostatus(current_job, results)
+                self.countstepstatus(current_job, results)
+                if current_job.type != 'feature' and getattr(self.config, 'junit'):
+                        results['junit_report'] = self.generate_junit_report(current_job, writebuf)
+                self.resultsqueue.put(results)
 
     def setfeature(self, current_job):
         if current_job.type == 'feature':
