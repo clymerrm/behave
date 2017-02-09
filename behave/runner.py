@@ -694,24 +694,25 @@ class Runner(object):
 
         for i in range(proc_count):
             p = multiprocessing.Process(target=self.worker, args=(i, ))
-            procs.append(p)
+            p.start()
+            p.terminate()
+            p.join()
+            # procs.append(p)
        # [p.join() for p in procs]
 
-        print(procs)
+        #
+        # for p in procs:
+        #     print('START: ' + str(p))
+        #     p.start()
 
-        for p in procs:
-            print('START: ' + str(p))
-            p.start()
-
-        for p in procs:
-            print('JOIN: ' + str(procs))
-            p.join()
+        # for p in procs:
+        #     print('JOIN: ' + str(procs))
+        #     p.join()
 
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
 
     def worker(self, proc_number):
-        print('WORKER DATA: ' + str(proc_number) + str(self.joblist_index_queue.qsize() > 0))
         while self.joblist_index_queue.qsize() > 0:
             try:
                 joblist_index = self.joblist_index_queue.get_nowait()
