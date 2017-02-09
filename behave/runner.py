@@ -710,7 +710,7 @@ class Runner(object):
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
 
-    def worker(self, job):
+    def worker(self, proc_number):
         while 1:
             try:
                 joblist_index = self.joblist_index_queue.get_nowait()
@@ -741,8 +741,7 @@ class Runner(object):
 
             # self.clean_buffer(writebuf)
             job_report_text = self.generatereport(
-                # proc_number
-                current_job, start_time, end_time, writebuf)
+                proc_number, current_job, start_time, end_time, writebuf)
 
             if job_report_text:
                 results = dict()
