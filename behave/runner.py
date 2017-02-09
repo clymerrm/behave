@@ -686,9 +686,6 @@ class Runner(object):
         time.sleep(2)
 
         print(proc_count)
-        multiprocessing.log_to_stderr()
-        logger = multiprocessing.get_logger()
-        logger.setLevel(logging.DEBUG)
 
         procs = []
 
@@ -705,7 +702,7 @@ class Runner(object):
         #     p.start()
 
         for p in procs:
-            print('JOIN: ' + str(procs))
+            print(procs)
             p.join()
 
         self.run_hook('after_all', self.context)
@@ -840,6 +837,7 @@ class Runner(object):
             print(("\n" * 3))
             print(("_" * 75))
             jobresult = self.resultsqueue.get()
+            print(jobresult)
 
             try:
                 print((self.to_unicode(jobresult['reportinginfo'])))
