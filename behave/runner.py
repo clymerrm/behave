@@ -712,9 +712,9 @@ class Runner(object):
 
     def worker(self, proc_number):
         while self.joblist_index_queue.qsize() > 0:
-            print('QUEUE DATA: ' + str(self.joblist_index_queue.get_nowait()))
             try:
                 joblist_index = self.joblist_index_queue.get_nowait()
+                print('QUEUE DATA: ' + str(self.joblist_index_queue.get_nowait()))
             except Queue.Empty:
                 print(self.joblist_index_queue.get_nowait())
                 break
