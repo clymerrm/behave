@@ -704,7 +704,7 @@ class Runner(object):
        #      p.join()
         from multiprocessing.dummy import Pool
         pool = Pool(proc_count)
-        results = pool.map(self.worker, self.job_list)
+        results = pool.map(self.worker, self.joblist)
         pool.close()
         pool.join()
 
