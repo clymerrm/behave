@@ -702,9 +702,11 @@ class Runner(object):
        #  for p in procs:
        #      print(procs)
        #      p.join()
-        print(self.joblist_index_queue)
-        p = multiprocessing.Pool(proc_count)
-        p.map(self.worker, self.joblist_index_queue)
+        from multiprocessing.dummy import Pool
+        pool = Pool(proc_count)
+        results = pool.map(self.worker, self.job_list)
+        pool.close()
+        pool.join()
 
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
