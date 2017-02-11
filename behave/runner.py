@@ -704,15 +704,14 @@ class Runner(object):
        #      p.join()
         from multiprocessing.dummy import Pool
         pool = Pool(proc_count)
-        results = pool.map(self.worker, self.joblist)
+        results = pool.map(self.worker, range(feature_count))
         pool.close()
         pool.join()
 
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
 
-    def worker(self):
-        proc_number = 0
+    def worker(self, proc_number):
         while self.joblist_index_queue.qsize() > 0:
             try:
                 joblist_index = self.joblist_index_queue.get_nowait()
