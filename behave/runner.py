@@ -685,28 +685,31 @@ class Runner(object):
                .format(scenario_count, feature_count, proc_count)))
         time.sleep(2)
 
-        print(proc_count)
-
-        procs = []
-
-        for i in range(proc_count):
-            p = multiprocessing.Process(target=self.worker, args=(i, ))
-            procs.append(p)
-       # [p.join() for p in procs]
-
-
-        for p in procs:
-            print(p)
-            p.start()
-
-        for p in procs:
-            print(procs)
-            p.join()
+       #  print(proc_count)
+       #
+       #  procs = []
+       #
+       #  for i in range(proc_count):
+       #      p = multiprocessing.Process(target=self.worker, args=(i, ))
+       #      procs.append(p)
+       # # [p.join() for p in procs]
+       #
+       #
+       #  for p in procs:
+       #      print(p)
+       #      p.start()
+       #
+       #  for p in procs:
+       #      print(procs)
+       #      p.join()
+        p = multiprocessing.Pool(proc_count)
+        p.map(self.worker)
 
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
 
-    def worker(self, proc_number):
+    def worker(self):
+        proc_number = 0
         while self.joblist_index_queue.qsize() > 0:
             try:
                 joblist_index = self.joblist_index_queue.get_nowait()
