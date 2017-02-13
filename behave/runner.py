@@ -700,8 +700,8 @@ class Runner(object):
         #     print(procs)
         #     p.join()
         #     print(p.is_alive())
-        Worker.multiprocessor(funccall=self.worker, proc_count=proc_count, features=feature_count)
-
+        mp = MultiProcessor(funccall=self.worker, proc_count=proc_count, features=feature_count)
+        mp.multiprocessor()
 
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
@@ -1082,10 +1082,15 @@ class Runner(object):
         string = str(var) if isinstance(var, int) else var
         return str(string) if isinstance(string, str) else string
 
-class Worker(object):
+class MultiProcessor(object):
 
-    def multiprocessor(self, funccall, proc_count, features):
-        pool = multiprocessing.Pool(processes=proc_count)
-        pool.map(funccall, range(features))
+    def __init__(self, funccall, proc_count, feature_count):
+        self.funccall = funccall
+        self.proc_count = proc_count
+        self.feature_count = feature_count
+
+    def multiprocessor(self):
+        pool = multiprocessing.Pool(processes=self.proc_count)
+        pool.map(self.funccall, range(self.feature_count))
         pool.close()
         pool.join()
