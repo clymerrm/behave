@@ -704,7 +704,7 @@ class Runner(object):
        #      p.join()
         print(feature_count)
         pool = multiprocessing.Pool(proc_count)
-        results = pool.map(self.worker, range(feature_count))
+        results = pool.map(self.worker, range(int(feature_count)))
         print(results)
         pool.close()
         pool.join()
