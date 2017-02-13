@@ -707,7 +707,7 @@ class Runner(object):
        #      p.join()
         from multiprocessing import Pool
         pool = Pool(proc_count)
-        results = pool.map(self.worker, self.joblist)
+        results = pool.map(self.worker, range(feature_count))
         pool.close()
         pool.join()
 
@@ -721,8 +721,7 @@ class Runner(object):
         #     except Queue.Empty:
         #         print(self.joblist_index_queue.get_nowait())
         #         break
-        # current_job = self.joblist[joblist_index]
-        current_job = job
+        current_job = self.joblist[job]
         writebuf = io.StringIO()
         self.setfeature(current_job)
         self.config.outputs = []
