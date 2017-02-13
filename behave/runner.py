@@ -396,6 +396,16 @@ class Runner(object):
         self.context = None
         self.formatters = None
 
+    def __getstate__(self):
+        """ This is called before pickling. """
+        state = self.__dict__.copy()
+        del state['featurecount']
+        return state
+
+    def __setstate__(self, state):
+        """ This is called while unpickling. """
+        self.__dict__.update(state)
+
     # @aborted.setter
 
     def _get_aborted(self):
@@ -683,7 +693,7 @@ class Runner(object):
                 " consideration by {2} workers. Some may be skipped if the"
                 " -t option was given..."
                .format(scenario_count, feature_count, proc_count)))
-        time.sleep(2)
+        # time.sleep(2)
 
        #  print(proc_count)
        #
@@ -702,7 +712,6 @@ class Runner(object):
        #  for p in procs:
        #      print(procs)
        #      p.join()
-        print(feature_count)
         pool = multiprocessing.Pool(proc_count)
         results = pool.map(self.worker, range(int(feature_count)))
         print(results)
