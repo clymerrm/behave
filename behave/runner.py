@@ -703,8 +703,8 @@ class Runner(object):
        #      print(procs)
        #      p.join()
         print(feature_count)
-        from multiprocessing.dummy import Pool as ThreadPool
-        pool = multiprocessing.dummy.ThreadPool(proc_count)
+        from multiprocessing.dummy import Pool
+        pool = multiprocessing.dummy.Pool(proc_count)
         results = pool.map(self.worker, range(feature_count))
         print(results)
         pool.close()
