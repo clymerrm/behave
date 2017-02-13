@@ -700,7 +700,7 @@ class Runner(object):
         #     print(procs)
         #     p.join()
         #     print(p.is_alive())
-        mp = MultiProcessor(funccall=self.worker, proc_count=proc_count, features=feature_count)
+        mp = MultiProcessor(funccall=self.worker, proc_count=proc_count, feature_count=feature_count)
         mp.multiprocessor()
 
         self.run_hook('after_all', self.context)
