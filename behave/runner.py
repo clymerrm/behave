@@ -652,10 +652,11 @@ class Runner(object):
             pass
         self.context._emit_warning = do_nothing
 
-
+        print('Got Here 1')
         self.joblist_index_queue = multiprocessing.Manager().JoinableQueue()
         self.resultsqueue = multiprocessing.Manager().JoinableQueue()
 
+        print('Got Here 2')
         self.joblist = []
         scenario_count = 0
         feature_count = 0
@@ -677,6 +678,8 @@ class Runner(object):
                         self.joblist_index_queue.put(
                             feature_count + scenario_count)
                         scenario_count += 1
+
+        print('Got Here 3')
 
         proc_count = int(getattr(self.config, 'proc_count'))
         print(("INFO: {0} scenario(s) and {1} feature(s) queued for"
@@ -702,7 +705,7 @@ class Runner(object):
        #  for p in procs:
        #      print(procs)
        #      p.join()
-        from multiprocessing.dummy import Pool
+        from multiprocessing import Pool
         pool = Pool(proc_count)
         results = pool.map(self.worker, self.joblist)
         pool.close()
