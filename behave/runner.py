@@ -711,11 +711,11 @@ class Runner(object):
 
     def worker(self, proc_number):
         while 1:
-            try:
-                joblist_index = self.joblist_index_queue.get_nowait()
-            except Exception as e:
-                break
-            current_job = self.joblist[joblist_index]
+            # try:
+            #     joblist_index = self.joblist_index_queue.get_nowait()
+            # except Exception as e:
+            #     break
+            current_job = self.joblist[proc_number]
             writebuf = io.StringIO()
             self.setfeature(current_job)
             self.config.outputs = []
