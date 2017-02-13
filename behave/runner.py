@@ -691,16 +691,20 @@ class Runner(object):
             p = multiprocessing.Process(target=self.worker, args=(i, ))
             procs.append(p)
 
-        print(procs)
+        # print(procs)
+        # for p in procs:
+        #     print(p)
+        #     p.start()
+        #
+        # for p in procs:
+        #     print(procs)
+        #     p.join()
+        #     print(p.is_alive())
+        pool = multiprocessing.Pool(processes=proc_count)
+        pool.map(self.worker, 0)
+        pool.close()
+        pool.join()
 
-        for p in procs:
-            print(p)
-            p.start()
-
-        for p in procs:
-            print(procs)
-            p.join()
-            print(p.is_alive())
 
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
