@@ -650,7 +650,7 @@ class Runner(object):
         def do_nothing(obj2, obj3):
             pass
         self.context._emit_warning = do_nothing
-
+        multiprocessing.log_to_stderr(logging.DEBUG)
         print('Got Here 1')
         # self.joblist_index_queuejoblist_index_queue = multiprocessing.Manager().JoinableQueue()
         self.resultsqueue = multiprocessing.Manager().JoinableQueue()
@@ -704,7 +704,7 @@ class Runner(object):
        #      p.join()
         print(feature_count)
         from multiprocessing.dummy import Pool as ThreadPool
-        pool = ThreadPool(proc_count)
+        pool = multiprocessing.dummy.ThreadPool(proc_count)
         results = pool.map(self.worker, range(feature_count))
         print(results)
         pool.close()
