@@ -695,6 +695,9 @@ class Runner(object):
         for p in procs:
             print(p)
             p.start()
+
+        for p in procs:
+            print(procs)
             p.join()
             print(p.is_alive())
 
