@@ -705,9 +705,11 @@ class Runner(object):
        #  for p in procs:
        #      print(procs)
        #      p.join()
-        from multiprocessing import Pool
-        pool = Pool(proc_count)
+        print(feature_count)
+        from multiprocessing.dummy import Pool as ThreadPool
+        pool = ThreadPool(proc_count)
         results = pool.map(self.worker, range(feature_count))
+        print(results)
         pool.close()
         pool.join()
 
@@ -722,6 +724,7 @@ class Runner(object):
         #         print(self.joblist_index_queue.get_nowait())
         #         break
         current_job = self.joblist[job]
+        # current_job = job
         writebuf = io.StringIO()
         self.setfeature(current_job)
         self.config.outputs = []
