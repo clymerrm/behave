@@ -700,10 +700,7 @@ class Runner(object):
         #     print(procs)
         #     p.join()
         #     print(p.is_alive())
-        pool = multiprocessing.Pool(processes=proc_count)
-        pool.map(self.worker, range(feature_count))
-        pool.close()
-        pool.join()
+        Worker.multiprocessor(funccall=self.worker, proc_count=proc_count, features=feature_count)
 
 
         self.run_hook('after_all', self.context)
@@ -1084,3 +1081,11 @@ class Runner(object):
     def to_unicode(var):
         string = str(var) if isinstance(var, int) else var
         return str(string) if isinstance(string, str) else string
+
+class Worker(object):
+
+    def multiprocessor(self, funccall, proc_count, features):
+        pool = multiprocessing.Pool(processes=proc_count)
+        pool.map(funccall, range(features))
+        pool.close()
+        pool.join()
