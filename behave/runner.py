@@ -695,10 +695,8 @@ class Runner(object):
         for p in procs:
             print(p)
             p.start()
-
-        for p in procs:
-            print(procs)
             p.join()
+            print(p.is_alive())
 
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
