@@ -27,7 +27,6 @@ from behave.reporter.converter import convert
 multiprocessing = None
 try:
     import multiprocessing
-    import Queue
 except ImportError as e:
     pass
 
