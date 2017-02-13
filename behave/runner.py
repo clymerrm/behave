@@ -684,6 +684,7 @@ class Runner(object):
                .format(scenario_count, feature_count, proc_count)))
         time.sleep(2)
 
+        multiprocessing.log_to_stderr(logging.DEBUG)
         print(proc_count)
         procs = []
         for i in range(proc_count):
