@@ -1082,6 +1082,7 @@ class Runner(object):
         string = str(var) if isinstance(var, int) else var
         return str(string) if isinstance(string, str) else string
 
+
 class MultiProcessor(object):
 
     def __init__(self, funccall, proc_count, feature_count):
@@ -1090,6 +1091,7 @@ class MultiProcessor(object):
         self.feature_count = feature_count
 
     def multiprocessor(self):
+        multiprocessing.get_context('spawn')
         pool = multiprocessing.Pool(processes=self.proc_count)
         pool.map(self.funccall, range(self.feature_count))
         pool.close()
