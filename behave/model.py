@@ -531,6 +531,11 @@ class Feature(TagAndStatusStatement, Replayable):
             # -- SPECIAL CASE: Feature without scenarios
             self._cached_status = 'skipped'
 
+        if hooks_called:
+            runner.run_hook('after_feature', runner.context, self)
+            for tag in self.tags:
+                runner.run_hook('after_tag', runner.context, tag)
+
         runner.context._pop()
 
         if run_feature or runner.config.show_skipped:

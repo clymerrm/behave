@@ -395,9 +395,6 @@ class Runner(object):
         self.base_dir = None
         self.context = None
         self.formatters = None
-        self.joblist_index_queue = multiprocessing.Manager().JoinableQueue()
-        self.resultsqueue = multiprocessing.Manager().JoinableQueue()
-        self.joblist = []
 
     # @aborted.setter
 
@@ -557,10 +554,12 @@ class Runner(object):
     def feature_locations(self):
         return collect_feature_locations(self.config.paths)
 
+
     def run(self):
         with self.path_manager:
             self.setup_paths()
             return self.run_with_paths()
+
 
     def run_with_paths(self):
         context = self.context = Context(self)
@@ -626,7 +625,9 @@ class Runner(object):
                   (len(self.undefined_steps) > undefined_steps_initial_size))
         return failed
 
+
     def run_multiproc(self):
+
         if not multiprocessing:
             print ("ERROR: Cannot import multiprocessing module."
             " If you're on python2.5, go get the backport")
@@ -638,7 +639,8 @@ class Runner(object):
             self.parallel_element = 'scenario'
             print("INFO: Without giving --parallel-element, defaulting to 'scenario'...")
         else:
-            if self.parallel_element != 'feature' and self.parallel_element != 'scenario':
+            if self.parallel_element != 'feature' and \
+                self.parallel_element != 'scenario':
                     print(("ERROR: When using --processes, --parallel-element"
                     " option must be set to 'feature' or 'scenario'. You gave '"+
                     str(self.parallel_element)+"', which isn't valid."))
@@ -649,6 +651,11 @@ class Runner(object):
             pass
         self.context._emit_warning = do_nothing
 
+
+        self.joblist_index_queue = multiprocessing.Manager().JoinableQueue()
+        self.resultsqueue = multiprocessing.Manager().JoinableQueue()
+
+        self.joblist = []
         scenario_count = 0
         feature_count = 0
         for feature in self.features:
@@ -751,9 +758,6 @@ class Runner(object):
 
             start_time = time.strftime("%Y-%m-%d %H:%M:%S")
             current_job.run(self)
-            self.run_hook('after_feature', self.context)
-            # for tag in self.tags:
-            #     self.run_hook('after_tag', self.context, tag)
             end_time = time.strftime("%Y-%m-%d %H:%M:%S")
 
             sys.stderr.write(current_job.status[0]+"\n")
