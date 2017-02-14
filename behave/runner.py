@@ -685,54 +685,55 @@ class Runner(object):
                 " -t option was given..."
                .format(scenario_count, feature_count, proc_count)))
         time.sleep(0.5)
-        processes = {}
-        n = 0
-        procs = []
-        for i in range(proc_count):
-            p = multiprocessing.Process(target=self.worker, args=(i, ))
-            procs.append(p)
-            processes[n] = p
-            n += 1
+        # processes = {}
+        # n = 0
+        # procs = []
+        pool = multiprocessing.Pool(proc_count)
+        test_runs = pool.map(self.worker, range(feature_count))
+        pool.close()
+        pool.join()
+        # for i in range(proc_count):
+        #     p = multiprocessing.Process(target=self.worker, args=(i, ))
+        #     procs.append(p)
+        #     processes[n] = p
+        #     n += 1
+        #
+        # print(procs)
+        # print(processes)
+        #
+        # for p in procs:
+        #     p.start()
+        #     # while True:
+        #     #     if p.is_alive():
+        #     #         break
 
-
-        print(procs)
-        print(processes)
-
-        for p in procs:
-            print('process starting' + str(p))
-            p.start()
-            print('process started' + str(p))
-            # while True:
-            #     if p.is_alive():
-            #         break
-
-        while len(processes) > 0:
-            for n in processes.keys():
-                p = processes[n]
-                print(p)
-                time.sleep(0.5)
-                if p.exitcode is None and p.is_alive():
-                    pass
-                elif int(p.exitcode) is None and not p.is_alive():
-                    print('2nd if Processes restarted')
-                    p.terminate()
-                    p = multiprocessing.Process(target=self.worker, args=(i,))
-                    procs.append(p)
-                    processes[n] = p
-                    n += 1
-                    p.start()
-                elif int(p.exitcode) < 0:
-                    print('3rd if Processes restarted')
-                    p.terminate()
-                    p = multiprocessing.Process(target=self.worker, args=(i,))
-                    procs.append(p)
-                    processes[n] = p
-                    n += 1
-                    p.start()
-                elif p.exitcode == 0:
-                    p.join()
-                    del processes[n]
-        print('Processes finished')
+        # while len(processes) > 0:
+        #     for n in processes.keys():
+        #         p = processes[n]
+        #         print(p)
+        #         time.sleep(0.5)
+        #         if p.exitcode is None and p.is_alive():
+        #             pass
+        #         elif int(p.exitcode) is None and not p.is_alive():
+        #             print('2nd if Processes restarted')
+        #             p.terminate()
+        #             p = multiprocessing.Process(target=self.worker, args=(i,))
+        #             procs.append(p)
+        #             processes[n] = p
+        #             n += 1
+        #             p.start()
+        #         elif int(p.exitcode) < 0:
+        #             print('3rd if Processes restarted')
+        #             p.terminate()
+        #             p = multiprocessing.Process(target=self.worker, args=(i,))
+        #             procs.append(p)
+        #             processes[n] = p
+        #             n += 1
+        #             p.start()
+        #         elif p.exitcode == 0:
+        #             p.join()
+        #             del processes[n]
+        # print('Processes finished')
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
 
