@@ -752,6 +752,8 @@ class Runner(object):
             start_time = time.strftime("%Y-%m-%d %H:%M:%S")
             current_job.run(self)
             self.run_hook('after_feature', self.context)
+            # for tag in self.tags:
+            #     self.run_hook('after_tag', self.context, tag)
             end_time = time.strftime("%Y-%m-%d %H:%M:%S")
 
             sys.stderr.write(current_job.status[0]+"\n")
