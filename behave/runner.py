@@ -700,6 +700,9 @@ class Runner(object):
         for p in procs:
             print(p)
             p.start()
+            while True:
+                if p.is_alive():
+                    break
 
         while len(processes) > 0:
             for n in processes.keys():
@@ -707,7 +710,7 @@ class Runner(object):
                 time.sleep(0.5)
                 if p.exitcode is None and p.is_alive():
                     pass
-                elif p.exitcode is None and not p.is_alive():
+                elif int(p.exitcode) is None and not p.is_alive():
                     print('2nd if Processes restarted')
                     p.terminate()
                     p = multiprocessing.Process(target=self.worker, args=(i,))
@@ -715,7 +718,7 @@ class Runner(object):
                     processes[n] = p
                     n += 1
                     p.start()
-                elif p.exitcode < 0:
+                elif int(p.exitcode) < 0:
                     print('3rd if Processes restarted')
                     p.terminate()
                     p = multiprocessing.Process(target=self.worker, args=(i,))
@@ -726,8 +729,6 @@ class Runner(object):
                 elif p.exitcode == 0:
                     p.join()
                     del processes[n]
-                else:
-                    print('something bad happened')
         print('Processes finished')
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
