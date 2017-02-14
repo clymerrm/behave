@@ -694,6 +694,7 @@ class Runner(object):
             processes[n] = p
             n += 1
 
+
         print(procs)
 
         for p in procs:
@@ -704,7 +705,7 @@ class Runner(object):
             for n in processes.keys():
                 p = processes[n]
                 time.sleep(1)
-                print(str(p) + str(p.is_alive()))
+                print('PROCESS:'str(p) + ' ALIVE:' + str(p.is_alive()) + ' EXIT CODE:' + str(p.exitcode))
                 if p.exitcode is None and p.is_alive():
                     pass
                 elif p.exitcode is None and not p.is_alive():
@@ -727,7 +728,6 @@ class Runner(object):
                     p.join()
                     del processes[n]
         print('Processes finished')
-
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
 
