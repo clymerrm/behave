@@ -696,17 +696,20 @@ class Runner(object):
 
 
         print(procs)
+        print(processes)
 
         for p in procs:
-            print(p)
+            print('process starting' + str(p))
             p.start()
-            while True:
-                if p.is_alive():
-                    break
+            print('process started' + str(p))
+            # while True:
+            #     if p.is_alive():
+            #         break
 
         while len(processes) > 0:
             for n in processes.keys():
                 p = processes[n]
+                print(p)
                 time.sleep(0.5)
                 if p.exitcode is None and p.is_alive():
                     pass
