@@ -687,9 +687,9 @@ class Runner(object):
         multiprocessing.log_to_stderr(logging.DEBUG)
         print(proc_count)
         procs = []
-        for i in range(proc_count):
-            p = multiprocessing.Process(target=self.worker, args=(i, ))
-            procs.append(p)
+        # for i in range(proc_count):
+        #     p = multiprocessing.Process(target=self.worker, args=(i, ))
+        #     procs.append(p)
 
         # print(procs)
         # for p in procs:
@@ -700,8 +700,11 @@ class Runner(object):
         #     print(procs)
         #     p.join()
         #     print(p.is_alive())
-        mp = MultiProcessor(funccall=self.worker, proc_count=proc_count, feature_count=feature_count)
-        mp.multiprocessor()
+        import pathos
+        pool = pathos.multiprocessing.ProcessingPool(proc_count)
+        pool.map(self.worker, range(feature_count))
+        # mp = MultiProcessor(funccall=self.worker, proc_count=proc_count, feature_count=feature_count)
+        # mp.multiprocessor()
 
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
@@ -1083,16 +1086,16 @@ class Runner(object):
         return str(string) if isinstance(string, str) else string
 
 
-class MultiProcessor(object):
-
-    def __init__(self, funccall, proc_count, feature_count):
-        self.funccall = funccall
-        self.proc_count = proc_count
-        self.feature_count = feature_count
-
-    def multiprocessor(self):
-        multiprocessing.get_context('spawn')
-        pool = multiprocessing.Pool(processes=self.proc_count)
-        pool.map(self.funccall, range(self.feature_count))
-        pool.close()
-        pool.join()
+# class MultiProcessor(object):
+#
+#     def __init__(self, funccall, proc_count, feature_count):
+#         self.funccall = funccall
+#         self.proc_count = proc_count
+#         self.feature_count = pickle.dumps(feature_count)
+#
+#     def multiprocessor(self):
+#         multiprocessing.get_context('spawn')
+#         pool = multiprocessing.Pool(processes=self.proc_count)
+#         pool.map(self.funccall, range(self.feature_count))
+#         pool.close()
+#         pool.join()
