@@ -705,7 +705,6 @@ class Runner(object):
             for n in processes.keys():
                 p = processes[n]
                 time.sleep(0.5)
-                print(p.exitcode < 0)
                 if p.exitcode is None and p.is_alive():
                     pass
                 elif p.exitcode is None and not p.is_alive():
@@ -724,10 +723,11 @@ class Runner(object):
                     processes[n] = p
                     n += 1
                     p.start()
-                else:
-                    print('got here instead')
+                elif p.exitcode == 0:
                     p.join()
                     del processes[n]
+                else:
+                    print('something bad happened')
         print('Processes finished')
         self.run_hook('after_all', self.context)
         return self.multiproc_fullreport()
