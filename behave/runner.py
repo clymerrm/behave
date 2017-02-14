@@ -703,8 +703,9 @@ class Runner(object):
         while len(processes) > 0:
             for n in processes.keys():
                 p = processes[n]
+                time.sleep(1)
+                print(str(p) + str(p.is_alive()))
                 if p.exitcode is None and p.is_alive():
-                    print('First If')
                     pass
                 elif p.exitcode is None and not p.is_alive():
                     print('2nd if Processes restarted')
@@ -723,7 +724,6 @@ class Runner(object):
                     n += 1
                     p.start()
                 else:
-                    print('4th if')
                     p.join()
                     del processes[n]
         print('Processes finished')
