@@ -704,12 +704,11 @@ class Runner(object):
         while len(processes) > 0:
             for n in processes.keys():
                 p = processes[n]
-                time.sleep(1)
-                print(type(p.exitcode))
-                print('PROCESS:' + str(p) + ' ALIVE:' + str(p.is_alive()) + ' EXIT CODE:' + str(p.exitcode))
+                time.sleep(0.5)
+                print(p.exitcode < 0)
                 if p.exitcode is None and p.is_alive():
                     pass
-                elif int(p.exitcode) is None and not p.is_alive():
+                elif p.exitcode is None and not p.is_alive():
                     print('2nd if Processes restarted')
                     p.terminate()
                     p = multiprocessing.Process(target=self.worker, args=(i,))
@@ -717,7 +716,7 @@ class Runner(object):
                     processes[n] = p
                     n += 1
                     p.start()
-                elif int(p.exitcode) < 0:
+                elif p.exitcode < 0:
                     print('3rd if Processes restarted')
                     p.terminate()
                     p = multiprocessing.Process(target=self.worker, args=(i,))
@@ -726,6 +725,7 @@ class Runner(object):
                     n += 1
                     p.start()
                 else:
+                    print('got here instead')
                     p.join()
                     del processes[n]
         print('Processes finished')
