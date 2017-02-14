@@ -705,7 +705,7 @@ class Runner(object):
             for n in processes.keys():
                 p = processes[n]
                 time.sleep(1)
-                print('PROCESS:'str(p) + ' ALIVE:' + str(p.is_alive()) + ' EXIT CODE:' + str(p.exitcode))
+                print('PROCESS:' + str(p) + ' ALIVE:' + str(p.is_alive()) + ' EXIT CODE:' + str(p.exitcode))
                 if p.exitcode is None and p.is_alive():
                     pass
                 elif p.exitcode is None and not p.is_alive():
