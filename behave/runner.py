@@ -678,9 +678,7 @@ class Runner(object):
                         scenario_count += 1
 
         proc_count = int(getattr(self.config, 'proc_count'))
-        if proc_count >= feature_count:
-            proc_count = proc_count
-        else:
+        if feature_count <= proc_count:
             proc_count = feature_count
         print(("INFO: {0} scenario(s) and {1} feature(s) queued for"
                 " consideration by {2} workers. Some may be skipped if the"
@@ -703,21 +701,21 @@ class Runner(object):
             print(p)
             p.start()
 
-        for p in procs:
-            p.join()
-
-        # while len(processes) > 0:
-        #     for n in processes.keys():
-        #         p = processes[n]
-        #         time.sleep(0.5)
-        #         if p.exitcode is None and not p.is_alive():
-        #             #restart
-        #         elif p.exitcode < 0:
-        #             print('Processes restarted')
-        #             p.terminate()
-        #         else:
-        #             p.join()
-        #             del processes[n]
+        while len(processes) > 0:
+            for n in processes.keys():
+                p = processes[n]
+                time.sleep(0.5)
+                if (p.exitcode is None and not p.is_alive()) or p.exitcode < 0:
+                    print('Processes restarted')
+                    p.terminate()
+                    p = multiprocessing.Process(target=self.worker, args=(i,))
+                    procs.append(p)
+                    processes[n] = p
+                    n += 1
+                    p.start()
+                else:
+                    p.join()
+                    del processes[n]
         print('Processes finished')
 
         self.run_hook('after_all', self.context)
