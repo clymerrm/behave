@@ -532,7 +532,7 @@ class Feature(TagAndStatusStatement, Replayable):
             self._cached_status = 'skipped'
 
         if hooks_called:
-            runner.run_hook('after_feature', runner.context, self)
+            # runner.run_hook('after_feature', runner.context, self)
             for tag in self.tags:
                 runner.run_hook('after_tag', runner.context, tag)
 
