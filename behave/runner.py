@@ -625,6 +625,11 @@ class Runner(object):
                   (len(self.undefined_steps) > undefined_steps_initial_size))
         return failed
 
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, d):
+        self.__dict__.update(d)
 
     def run_multiproc(self):
 
